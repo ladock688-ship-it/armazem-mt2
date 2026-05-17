@@ -572,15 +572,31 @@
                 <!-- ABA PROMOÇÃO -->
                 <div class="adm-panel" id="adm-promo">
                     <div class="admin-section" style="margin-top:0;padding-top:0;border-top:none;">
-                        <h3>🎉 Promoção Especial</h3>
                         <div id="promo-status-adm" style="text-align:center;padding:10px;border-radius:10px;margin-bottom:14px;font-weight:700;font-size:14px;"></div>
+
+                        <!-- TIPO 1: DESCONTO % -->
+                        <h3 style="margin-bottom:6px;">🔥 Tipo 1 — Desconto em tudo</h3>
+                        <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Aplica % de desconto em todos os itens. Substitui todos os outros descontos.</p>
                         <span class="field-label">Desconto (%):</span>
                         <input type="number" class="field-input" id="adm-promo-pct" step="5" min="0" max="100" placeholder="Ex: 20">
                         <span class="field-label">Mensagem (opcional):</span>
                         <input type="text" class="field-input" id="adm-promo-msg" placeholder="Ex: Promoção de fim de semana!">
+                        <button class="save-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);margin-top:10px;" onclick="togglePromo('desconto', true)">🚀 Ativar Desconto</button>
+
+                        <div style="border-top:1px solid var(--border);margin:18px 0;"></div>
+
+                        <!-- TIPO 2: BRINDE -->
+                        <h3 style="margin-bottom:6px;">🎁 Tipo 2 — Brinde por valor mínimo</h3>
+                        <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Exibe um aviso de brinde quando o pedido atingir o valor definido.</p>
+                        <span class="field-label">Valor mínimo (R$):</span>
+                        <input type="number" class="field-input" id="adm-brinde-valor" step="10" min="0" placeholder="Ex: 50">
+                        <span class="field-label">Descrição do brinde:</span>
+                        <input type="text" class="field-input" id="adm-brinde-msg" placeholder="Ex: 1 Baú da Ceifadora grátis!">
+                        <button class="save-btn" style="background:linear-gradient(135deg,#34d399,#059669);margin-top:10px;" onclick="togglePromo('brinde', true)">🎁 Ativar Brinde</button>
+
+                        <div style="border-top:1px solid var(--border);margin:18px 0;"></div>
+                        <button class="save-btn" style="background:linear-gradient(135deg,#6b7280,#4b5563);" onclick="togglePromo('', false)">❌ Desativar Tudo</button>
                     </div>
-                    <button class="save-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);" onclick="togglePromo(true)">🚀 Ativar Promoção</button>
-                    <button class="save-btn" style="background:linear-gradient(135deg,#6b7280,#4b5563);margin-top:8px;" onclick="togglePromo(false)">❌ Desativar Promoção</button>
                     <div class="sync-status" id="syncStatusPromo"></div>
                 </div>
 
@@ -827,65 +843,88 @@
             draw();
         }
 
-        function applyPromoToCart(pct) {
-            // Aplicado no updateCart dinamicamente
-        }
-
         function showPromoBanner() {
             const promo = shopData.promo;
-            if (!promo || !promo.active) { document.getElementById('promoBanner').style.display = 'none'; return; }
-            const pct = promo.pct || 0;
-            const msg = promo.msg || '';
-            document.getElementById('promoBannerText').textContent = '🔥 ' + pct + '% DE DESCONTO EM TUDO!' + (msg ? ' — ' + msg : '');
-            document.getElementById('promoBanner').style.display = 'block';
-            // Empurra o conteúdo para baixo
+            const banner = document.getElementById('promoBanner');
+            if (!promo || !promo.active) {
+                banner.style.display = 'none';
+                document.querySelector('.container').style.paddingTop = '';
+                return;
+            }
+            let txt = '';
+            if (promo.type === 'desconto') txt = '🔥 ' + promo.pct + '% DE DESCONTO EM TUDO!' + (promo.msg ? ' — ' + promo.msg : '');
+            if (promo.type === 'brinde') txt = '🎁 Compras acima de R$' + parseFloat(promo.brindeValor).toFixed(2).replace('.', ',') + ' ganham: ' + promo.brindeMsg + '!';
+            document.getElementById('promoBannerText').textContent = txt;
+            banner.style.display = 'block';
             document.querySelector('.container').style.paddingTop = '50px';
         }
 
-        async function togglePromo(activate) {
-            const pct = parseFloat(document.getElementById('adm-promo-pct').value) || 0;
-            const msg = document.getElementById('adm-promo-msg').value || '';
+        async function togglePromo(type, activate) {
             const statusEl = document.getElementById('syncStatusPromo');
-            const admStatusEl = document.getElementById('promo-status-adm');
-
-            if (activate && pct <= 0) { alert('Digite um percentual de desconto!'); return; }
-
-            shopData.promo = { active: activate, pct: pct, msg: msg };
-            statusEl.textContent = activate ? '✅ Promoção ativada!' : '✅ Promoção desativada!';
-            statusEl.style.color = activate ? 'var(--green)' : 'var(--text-muted)';
-            admStatusEl.textContent = activate ? '🔥 PROMOÇÃO ATIVA: ' + pct + '% OFF' : '⭕ Sem promoção ativa';
-            admStatusEl.style.background = activate ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.04)';
-            admStatusEl.style.color = activate ? '#f59e0b' : 'var(--text-muted)';
-
+            if (!activate) {
+                shopData.promo = { active: false, type: '', pct: 0, msg: '', brindeValor: 0, brindeMsg: '' };
+            } else if (type === 'desconto') {
+                const pct = parseFloat(document.getElementById('adm-promo-pct').value) || 0;
+                if (pct <= 0) { alert('Digite um percentual de desconto!'); return; }
+                const msg = document.getElementById('adm-promo-msg').value || '';
+                shopData.promo = { active: true, type: 'desconto', pct, msg, brindeValor: 0, brindeMsg: '' };
+            } else if (type === 'brinde') {
+                const valor = parseFloat(document.getElementById('adm-brinde-valor').value) || 0;
+                const msg = document.getElementById('adm-brinde-msg').value || '';
+                if (valor <= 0) { alert('Digite um valor mínimo!'); return; }
+                if (!msg) { alert('Descreva o brinde!'); return; }
+                shopData.promo = { active: true, type: 'brinde', pct: 0, msg: '', brindeValor: valor, brindeMsg: msg };
+            }
             showPromoBanner();
+            updatePromoAdmStatus();
             if (activate) launchConfetti();
             renderAll();
             await saveDataOnline();
+            statusEl.textContent = activate ? '✅ Promoção ativada!' : '✅ Promoção desativada!';
+            statusEl.style.color = activate ? 'var(--green)' : 'var(--text-muted)';
             setTimeout(() => { statusEl.textContent = ''; }, 3000);
         }
 
         function updatePromoAdmStatus() {
             const promo = shopData.promo;
-            const admStatusEl = document.getElementById('promo-status-adm');
-            if (!admStatusEl) return;
+            const el = document.getElementById('promo-status-adm');
+            if (!el) return;
             if (promo && promo.active) {
-                admStatusEl.textContent = '🔥 PROMOÇÃO ATIVA: ' + promo.pct + '% OFF';
-                admStatusEl.style.background = 'rgba(245,158,11,0.15)';
-                admStatusEl.style.color = '#f59e0b';
-                document.getElementById('adm-promo-pct').value = promo.pct;
-                document.getElementById('adm-promo-msg').value = promo.msg || '';
+                if (promo.type === 'desconto') {
+                    el.textContent = '🔥 ATIVO: Desconto de ' + promo.pct + '% em tudo';
+                    el.style.background = 'rgba(245,158,11,0.15)';
+                    el.style.color = '#f59e0b';
+                    document.getElementById('adm-promo-pct').value = promo.pct;
+                    document.getElementById('adm-promo-msg').value = promo.msg || '';
+                } else if (promo.type === 'brinde') {
+                    el.textContent = '🎁 ATIVO: Brinde acima de R$' + promo.brindeValor + ' — ' + promo.brindeMsg;
+                    el.style.background = 'rgba(52,211,153,0.15)';
+                    el.style.color = 'var(--green)';
+                    document.getElementById('adm-brinde-valor').value = promo.brindeValor;
+                    document.getElementById('adm-brinde-msg').value = promo.brindeMsg || '';
+                }
             } else {
-                admStatusEl.textContent = '⭕ Sem promoção ativa';
-                admStatusEl.style.background = 'rgba(255,255,255,0.04)';
-                admStatusEl.style.color = 'var(--text-muted)';
+                el.textContent = '⭕ Nenhuma promoção ativa';
+                el.style.background = 'rgba(255,255,255,0.04)';
+                el.style.color = 'var(--text-muted)';
             }
         }
 
         function calcPriceWithPromo(item, qty) {
-            const base = calcPrice(item, qty);
             const promo = shopData.promo;
-            if (promo && promo.active && promo.pct > 0) return base * (1 - promo.pct / 100);
-            return base;
+            // Promoção de desconto substitui TUDO — aplica sobre preço cheio
+            if (promo && promo.active && promo.type === 'desconto' && promo.pct > 0) {
+                const p = shopData.prices;
+                let preçoCheio = 0;
+                if (item === 'pergaminho') preçoCheio = (qty / 200) * p.pergaminho;
+                else if (item === 'leitura') preçoCheio = qty * p.leitura;
+                else if (item === 'metal') preçoCheio = qty * p.metal;
+                else if (item === 'gold') preçoCheio = qty * p.gold;
+                else if (item === 'bau') preçoCheio = qty * p.bau;
+                return preçoCheio * (1 - promo.pct / 100);
+            }
+            // Sem promoção de desconto — usa lógica normal
+            return calcPrice(item, qty);
         }
 
         function fmtGold(val) {
@@ -954,14 +993,22 @@
             } else {
                 const DISCOUNT_THRESHOLD = 300;
                 const DISCOUNT_RATE = 0.10;
+                const promo = shopData.promo;
+                const promoDescontoAtiva = promo && promo.active && promo.type === 'desconto';
 
-                // Desconto carrinho: baseado no total SEM desconto de item
-                const hasCartDiscount = totalSemDesc >= DISCOUNT_THRESHOLD;
+                // Brinde notice
+                let brindeHTML = '';
+                if (promo && promo.active && promo.type === 'brinde' && totalSemDesc >= promo.brindeValor) {
+                    brindeHTML = '<div class="cart-discount-line" style="background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.25);"><span>🎁 ' + promo.brindeMsg + ' incluído!</span><span style="color:var(--green)">GRÁTIS</span></div>';
+                } else if (promo && promo.active && promo.type === 'brinde' && totalSemDesc < promo.brindeValor) {
+                    const faltaBrinde = (promo.brindeValor - totalSemDesc).toFixed(2).replace('.', ',');
+                    brindeHTML = '<div class="discount-info-note" style="margin-top:8px;">🎁 Faltam R$ ' + faltaBrinde + ' para ganhar: ' + promo.brindeMsg + '!</div>';
+                }
+
+                // Desconto R$300 só se promoção de desconto NÃO estiver ativa
+                const useCartDiscount = !promoDescontoAtiva && totalSemDesc >= DISCOUNT_THRESHOLD && (totalSemDesc * 0.9) < totalComDesc;
                 const cartDiscountVal = totalSemDesc * DISCOUNT_RATE;
                 const totalComCartDesc = totalSemDesc - cartDiscountVal;
-
-                // Usa o melhor desconto: carrinho ou itens individuais
-                const useCartDiscount = hasCartDiscount && totalComCartDesc < totalComDesc;
                 const finalTotal = useCartDiscount ? totalComCartDesc : totalComDesc;
                 const baseTotal = useCartDiscount ? totalSemDesc : totalComDesc;
 
@@ -973,12 +1020,14 @@
                 }
 
                 let progressHTML = '';
-                if (!hasCartDiscount) {
+                if (!useCartDiscount && !promoDescontoAtiva) {
                     const faltam = (DISCOUNT_THRESHOLD - totalSemDesc).toFixed(2).replace('.', ',');
+                    const progress = Math.min((totalSemDesc / DISCOUNT_THRESHOLD) * 100, 100);
                     progressHTML = '<div class="discount-progress-wrap"><div class="discount-progress-label"><span>🏷️ Faltam R$ ' + faltam + ' para 10% de desconto!</span></div><div class="discount-progress-bar"><div class="discount-progress-fill" style="width:' + progress + '%"></div></div><div class="discount-info-note">ℹ️ O maior desconto é aplicado automaticamente — descontos por quantidade e por pedido não se acumulam.</div></div>';
                 }
 
                 cartContent.innerHTML = '<div class="cart-items">' + cartHTML + '</div>'
+                    + brindeHTML
                     + discountHTML
                     + '<div class="cart-total"><span>Total</span><div class="cart-total-right">' + (useCartDiscount ? '<span class="cart-total-original">R$ ' + baseTotal.toFixed(2).replace('.', ',') + '</span>' : '') + '<span class="cart-total-value">R$ ' + finalTotal.toFixed(2).replace('.', ',') + '</span></div></div>'
                     + progressHTML;
@@ -1027,7 +1076,7 @@
             window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(msg), '_blank');
         }
 
-        function openAdmin() { document.getElementById('adminModal').style.display = 'block'; }
+        function openAdmin() { document.getElementById('adminModal').style.display = 'block'; setTimeout(() => document.getElementById('adminPass').focus(), 100); }
         function closeAdmin() { document.getElementById('adminModal').style.display = 'none'; document.getElementById('adminPass').value = ''; document.getElementById('adminPanel').style.display = 'none'; document.getElementById('loginBtn').style.display = 'block'; }
 
         function adminLogin() {
