@@ -611,10 +611,8 @@
     <script>
         const ADMIN_PASSWORD = 'qwert';
         const WHATSAPP = '5547999006250';
-        const BIN_ID = atob('NmEwODVlYmRjMDk1NDExMWQ4MzBkYmJh');
-        const MASTER_KEY = atob('JDJhJDEwJGFaUm5sa3pHb3JNVjJ2NGZ2MmlIRHV1QjdodEQyVWlDQlpydUxwcHNXanBmbnNEZFVxUkdh');
-        const ACCESS_KEY = atob('JDJhJDEwJHdlblZvb1dwUnpLNGRmREF0ck1uLmVyREUwNG1vYlNuclZTUVguTWpyLmhobHptNTN6dmUu');
-        const API_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
+        const WORKER_URL = 'https://armazem-api.ladock688.workers.dev';
+        const SITE_SECRET = 'armazem-worker-2025';
 
         const DEFAULT_DATA = {
             stock: { pergaminho: 5000, leitura: 200, metal: 50, gold: 500, bau: 10 },
@@ -632,9 +630,7 @@
         async function loadData() {
             showLoading(30);
             try {
-                const res = await fetch(API_URL + '/latest', {
-                    headers: { 'X-Access-Key': ACCESS_KEY }
-                });
+                const res = await fetch(WORKER_URL + '/data');
                 if (res.ok) {
                     const json = await res.json();
                     shopData = json.record;
@@ -656,11 +652,11 @@
             const ids = ['syncStatus','syncStatusPrecos','syncStatusItens','syncStatusPromo'];
             ids.forEach(id => { const el = document.getElementById(id); if(el){ el.className='sync-status'; el.textContent='⏳ Salvando...'; } });
             try {
-                const res = await fetch(API_URL, {
+                const res = await fetch(WORKER_URL + '/data', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Master-Key': MASTER_KEY
+                        'X-Site-Secret': SITE_SECRET
                     },
                     body: JSON.stringify(shopData)
                 });
