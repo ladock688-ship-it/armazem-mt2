@@ -789,9 +789,7 @@
         function cartChangeQtyExtra(index, dir) {
             const input = document.getElementById('qty-extra-' + index);
             if (!input) return;
-            input.value = Math.max(0, (parseInt(input.value) || 0) + dir);
-            changeQtyExtra(index, 0);
-            updateCart();
+            changeQtyExtra(index, dir);
         }
 
         function cartChangeQty(item, dir) {
@@ -1322,7 +1320,7 @@
                         ${esgotado ? '<div class="esgotado-badge">🚫 Esgotado</div>' : ''}
                         <div class="qty-row">
                             <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtra(${i},-1)">-</button>
-                            <input type="number" class="qty-input" id="qty-extra-${i}" value="0" min="0">
+                            <input type="number" class="qty-input" id="qty-extra-${i}" value="0" min="0" onchange="validateQtyExtra(${i})">
                             <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtra(${i},1)">+</button>
                         </div>
                         <div class="item-subtotal" id="sub-extra-${i}"></div>
@@ -1348,9 +1346,31 @@
 
         function changeQtyExtra(index, delta) {
             const input = document.getElementById('qty-extra-' + index);
-            const val = Math.max(0, (parseInt(input.value) || 0) + delta);
-            input.value = val;
             const c = shopData.consumiveis[index];
+            let val = Math.max(0, (parseInt(input.value) || 0) + delta);
+            if (val > c.stock) {
+                val = c.stock;
+                input.style.borderColor = 'var(--red)';
+                setTimeout(() => input.style.borderColor = '', 1000);
+            }
+            input.value = val;
+            const sub = val * parseFloat(c.preco);
+            const subEl = document.getElementById('sub-extra-' + index);
+            if (subEl) subEl.textContent = val > 0 ? 'R$ ' + sub.toFixed(2).replace('.', ',') : '';
+            updateCart();
+        }
+
+        function validateQtyExtra(index) {
+            const input = document.getElementById('qty-extra-' + index);
+            const c = shopData.consumiveis[index];
+            let val = parseInt(input.value) || 0;
+            if (val < 0) val = 0;
+            if (val > c.stock) {
+                val = c.stock;
+                input.style.borderColor = 'var(--red)';
+                setTimeout(() => input.style.borderColor = '', 1000);
+            }
+            input.value = val;
             const sub = val * parseFloat(c.preco);
             const subEl = document.getElementById('sub-extra-' + index);
             if (subEl) subEl.textContent = val > 0 ? 'R$ ' + sub.toFixed(2).replace('.', ',') : '';
