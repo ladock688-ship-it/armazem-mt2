@@ -609,10 +609,10 @@
     </div>
 
     <script>
-        const ADMIN_PASSWORD = 'qwert';
         const WHATSAPP = '5547999006250';
         const WORKER_URL = 'https://armazem-api.ladock688.workers.dev';
         const SITE_SECRET = 'armazem-worker-2025';
+        let authToken = null;
 
         const DEFAULT_DATA = {
             stock: { pergaminho: 5000, leitura: 200, metal: 50, gold: 500, bau: 10 },
@@ -656,7 +656,7 @@
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-Site-Secret': SITE_SECRET
+                        'X-Auth-Token': authToken
                     },
                     body: JSON.stringify(shopData)
                 });
@@ -1071,22 +1071,43 @@
         function openAdmin() { document.getElementById('adminModal').style.display = 'block'; setTimeout(() => document.getElementById('adminPass').focus(), 100); }
         function closeAdmin() { document.getElementById('adminModal').style.display = 'none'; document.getElementById('adminPass').value = ''; document.getElementById('adminPanel').style.display = 'none'; document.getElementById('loginBtn').style.display = 'block'; }
 
-        function adminLogin() {
-            if (document.getElementById('adminPass').value === ADMIN_PASSWORD) {
-                document.getElementById('adminPanel').style.display = 'block';
-                document.getElementById('loginBtn').style.display = 'none';
-                document.getElementById('adm-stock-pergaminho').value = shopData.stock.pergaminho;
-                document.getElementById('adm-stock-leitura').value = shopData.stock.leitura;
-                document.getElementById('adm-stock-metal').value = shopData.stock.metal;
-                document.getElementById('adm-stock-gold').value = shopData.stock.gold;
-                document.getElementById('adm-stock-bau').value = shopData.stock.bau;
-                document.getElementById('adm-price-pergaminho').value = shopData.prices.pergaminho;
-                document.getElementById('adm-price-leitura').value = shopData.prices.leitura;
-                document.getElementById('adm-price-metal').value = shopData.prices.metal;
-                document.getElementById('adm-price-gold').value = shopData.prices.gold;
-                document.getElementById('adm-price-bau').value = shopData.prices.bau;
-                document.getElementById('adm-sales').value = shopData.sales;
-            } else { alert('Senha incorreta!'); }
+        async function adminLogin() {
+            const password = document.getElementById('adminPass').value;
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.textContent = '⏳ Verificando...';
+            loginBtn.disabled = true;
+            try {
+                const res = await fetch(WORKER_URL + '/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Site-Secret': SITE_SECRET },
+                    body: JSON.stringify({ password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    authToken = data.token;
+                    document.getElementById('adminPanel').style.display = 'block';
+                    loginBtn.style.display = 'none';
+                    document.getElementById('adm-stock-pergaminho').value = shopData.stock.pergaminho;
+                    document.getElementById('adm-stock-leitura').value = shopData.stock.leitura;
+                    document.getElementById('adm-stock-metal').value = shopData.stock.metal;
+                    document.getElementById('adm-stock-gold').value = shopData.stock.gold;
+                    document.getElementById('adm-stock-bau').value = shopData.stock.bau;
+                    document.getElementById('adm-price-pergaminho').value = shopData.prices.pergaminho;
+                    document.getElementById('adm-price-leitura').value = shopData.prices.leitura;
+                    document.getElementById('adm-price-metal').value = shopData.prices.metal;
+                    document.getElementById('adm-price-gold').value = shopData.prices.gold;
+                    document.getElementById('adm-price-bau').value = shopData.prices.bau;
+                    document.getElementById('adm-sales').value = shopData.sales;
+                } else {
+                    alert('Senha incorreta!');
+                    loginBtn.textContent = '🔓 Entrar';
+                    loginBtn.disabled = false;
+                }
+            } catch(e) {
+                alert('Erro ao conectar. Tente novamente.');
+                loginBtn.textContent = '🔓 Entrar';
+                loginBtn.disabled = false;
+            }
         }
 
         async function adminSave() {
