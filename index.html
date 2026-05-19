@@ -34,6 +34,7 @@
             --radius: 14px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         body { font-family: 'Outfit', sans-serif; background: var(--bg-dark); color: var(--text); min-height: 100vh; position: relative; }
         .bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
         .header, .container, .modal { position: relative; z-index: 1; }
@@ -54,7 +55,7 @@
         .promo-banner-icon { font-size: 20px; animation: shake 0.5s infinite alternate; }
         @keyframes shake { 0% { transform: rotate(-10deg); } 100% { transform: rotate(10deg); } }
         .promo-active-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg,#f59e0b,#ef4444); color: #fff; font-size: 12px; font-weight: 800; padding: 4px 12px; border-radius: 20px; margin-left: 8px; animation: pulse 1.5s infinite; }
-        .loading-bar .bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+        .loading-bar .bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-light)); width: 0%; transition: width 0.4s ease; border-radius: 0 2px 2px 0; }
         .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
         .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 30px; }
         .tab { padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; font-family: 'Outfit', sans-serif; text-align: center; }
@@ -65,10 +66,9 @@
         .tab-content.active { display: block; }
         .items-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; align-items: stretch; }
         .consumiveis-wrapper { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-        .consumiveis-wrapper .items-grid { display: contents; }
-        .consumiveis-wrapper #extra-consumiveis-grid { display: contents; }
-        @media (max-width: 900px) { .items-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 480px) { .items-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+        .consumiveis-wrapper > .items-grid { display: contents; }
+        @media (max-width: 900px) { .items-grid { grid-template-columns: repeat(2, 1fr); } .consumiveis-wrapper { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px) { .items-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } .consumiveis-wrapper { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
         .item-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; text-align: center; transition: all 0.35s ease; position: relative; display: flex; flex-direction: column; align-items: center; }
         .item-card .qty-row { margin-top: auto; padding-top: 14px; width: 100%; justify-content: center; }
         .item-card:hover { background: var(--bg-card-hover); border-color: rgba(124,91,245,0.3); transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
@@ -86,7 +86,8 @@
         .best-seller-badge { display: inline-block; background: linear-gradient(135deg, var(--gold), #f59e0b); color: #000; font-size: 11px; font-weight: 800; padding: 5px 14px; border-radius: 20px; letter-spacing: 0.5px; margin: 8px 0; }
         .qty-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 14px 0 8px; }
         .qty-btn { width: 44px; height: 44px; border-radius: 8px; border: 1px solid var(--border); background: rgba(124,91,245,0.15); color: var(--accent-light); font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-family: 'Outfit', sans-serif; touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; }
-        .qty-btn:hover { background: var(--accent); color: #fff; }
+        .qty-btn:hover:not(:disabled) { background: var(--accent); color: #fff; }
+        .qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
         .qty-input { width: 64px; height: 34px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,0.3); color: #fff; text-align: center; font-size: 15px; font-weight: 600; font-family: 'Outfit', sans-serif; -moz-appearance: textfield; }
         .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         .qty-input:focus { outline: none; border-color: var(--accent); }
@@ -107,6 +108,8 @@
         .cart-clear-btn:hover { color: var(--red); border-color: var(--red); }
         .item-stock strong.out { color: var(--red); }
         .esgotado-badge { display: inline-block; background: rgba(248,113,113,0.15); border: 1px solid rgba(248,113,113,0.35); color: var(--red); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 6px; margin-top: 4px; letter-spacing: 0.3px; }
+        .item-card:has(.esgotado-badge) { opacity: 0.5; }
+        .item-card:has(.esgotado-badge):hover { opacity: 0.7; transform: none; box-shadow: none; }
         .cart-badge { background: var(--accent); color: #fff; font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
         .cart-empty { color: var(--text-muted); text-align: center; padding: 30px; font-size: 15px; }
         .cart-items { margin: 16px 0; }
@@ -166,6 +169,7 @@
         @media (max-width: 768px) {
             .logo { font-size: 38px; }
             .items-grid { grid-template-columns: 1fr; }
+            .consumiveis-wrapper { grid-template-columns: 1fr; }
             .equip-card { flex-direction: column; align-items: center; text-align: center; }
             .cart-total { font-size: 16px; }
         }
@@ -797,7 +801,8 @@
             const step = steps[item] || 1;
             const input = document.getElementById('qty-' + item);
             const current = parseInt(input.value) || 0;
-            const newVal = Math.max(0, current + dir * step);
+            let newVal = Math.max(0, current + dir * step);
+            if (newVal > shopData.stock[item]) newVal = shopData.stock[item];
             input.value = newVal;
             updateCart();
         }
@@ -806,6 +811,13 @@
             ['pergaminho','leitura','metal','gold','bau'].forEach(item => {
                 document.getElementById('qty-' + item).value = 0;
                 const subEl = document.getElementById('sub-' + item);
+                if (subEl) subEl.textContent = '';
+            });
+            // Limpa consumíveis extras também
+            (shopData.consumiveis || []).forEach((c, i) => {
+                const input = document.getElementById('qty-extra-' + i);
+                if (input) input.value = 0;
+                const subEl = document.getElementById('sub-extra-' + i);
                 if (subEl) subEl.textContent = '';
             });
             updateCart();
@@ -1310,7 +1322,7 @@
                 grid.innerHTML = extras.map((c, i) => {
                     const esgotado = c.stock <= 0;
                     const imgHTML = c.img
-                        ? `<img src="${c.img}" alt="${c.nome}" style="width:80px;height:80px;object-fit:contain;margin:0 auto 8px;display:block;" onclick="abrirImgModal('${c.img}')" onerror="this.style.display='none'">`
+                        ? `<img src="${c.img}" alt="${c.nome}" class="item-image" onclick="abrirImgModal('${c.img}')" onerror="this.style.display='none'">`
                         : `<div style="font-size:48px;margin-bottom:8px;">📦</div>`;
                     return `<div class="item-card${esgotado ? ' esgotado' : ''}">
                         ${imgHTML}
