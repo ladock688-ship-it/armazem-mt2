@@ -1304,8 +1304,8 @@
                 grid.innerHTML = extras.map((c, i) => {
                     const esgotado = c.stock <= 0;
                     const imgHTML = c.img
-                        ? `<img class="item-card-img" src="${c.img}" alt="${c.nome}" style="cursor:zoom-in;" onclick="abrirImgModal('${c.img}')" onerror="this.style.display='none'">`
-                        : `<div class="item-card-img-placeholder">📦</div>`;
+                        ? `<img src="${c.img}" alt="${c.nome}" style="width:80px;height:80px;object-fit:contain;margin:0 auto 8px;display:block;" onclick="abrirImgModal('${c.img}')" onerror="this.style.display='none'">`
+                        : `<div style="font-size:48px;margin-bottom:8px;">📦</div>`;
                     return `<div class="item-card${esgotado ? ' esgotado' : ''}">
                         ${imgHTML}
                         <div class="item-name">${c.nome}</div>
@@ -1353,16 +1353,14 @@
             const nome = document.getElementById('adm-extra-nome').value.trim();
             const img = document.getElementById('adm-extra-img').value.trim();
             const preco = parseFloat(document.getElementById('adm-extra-preco').value) || 0;
-            const unidade = document.getElementById('adm-extra-unidade').value.trim() || 'cada';
             const stock = parseInt(document.getElementById('adm-extra-stock').value) || 0;
             if (!nome) { alert('Digite o nome!'); return; }
             if (preco <= 0) { alert('Digite um preço válido!'); return; }
             if (!shopData.consumiveis) shopData.consumiveis = [];
-            shopData.consumiveis.push({ nome, img, preco, unidade, stock, id: Date.now() });
+            shopData.consumiveis.push({ nome, img, preco, stock, id: Date.now() });
             document.getElementById('adm-extra-nome').value = '';
             document.getElementById('adm-extra-img').value = '';
             document.getElementById('adm-extra-preco').value = '';
-            document.getElementById('adm-extra-unidade').value = '';
             document.getElementById('adm-extra-stock').value = '';
             renderConsumiveisExtras();
             await saveDataOnline();
@@ -1378,9 +1376,8 @@
         function editarConsumivel(index) {
             const c = shopData.consumiveis[index];
             document.getElementById('adm-extra-nome').value = c.nome;
-            document.getElementById('adm-extra-emoji').value = c.emoji || '';
+            document.getElementById('adm-extra-img').value = c.img || '';
             document.getElementById('adm-extra-preco').value = c.preco;
-            document.getElementById('adm-extra-unidade').value = c.unidade;
             document.getElementById('adm-extra-stock').value = c.stock;
             shopData.consumiveis.splice(index, 1);
             renderConsumiveisExtras();
