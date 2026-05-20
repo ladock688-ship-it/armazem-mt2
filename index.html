@@ -730,7 +730,6 @@
             document.getElementById('stock-leitura').textContent = shopData.stock.leitura;
             document.getElementById('stock-metal').textContent = shopData.stock.metal;
             document.getElementById('stock-gold').textContent = fmtGold(shopData.stock.gold);
-            document.getElementById('stock-bau').textContent = shopData.stock.bau;
             animateSalesCount(shopData.sales);
             const admSalesDisplay = document.getElementById('adm-sales-display');
             if (admSalesDisplay) admSalesDisplay.textContent = shopData.sales;
@@ -744,9 +743,8 @@
             document.getElementById('price-leitura').textContent = fmt(p.leitura) + ' cada';
             document.getElementById('price-metal').textContent = fmt(p.metal) + ' cada';
             document.getElementById('price-gold').textContent = fmt(p.gold) + ' por 1kk';
-            document.getElementById('price-bau').textContent = fmt(p.bau) + ' cada';
             const lowLimits = { pergaminho: 400, leitura: 10, metal: 10, gold: 100, bau: 5 };
-            ['pergaminho','leitura','metal','gold','bau'].forEach(k => {
+            ['pergaminho','leitura','metal','gold'].forEach(k => {
                 const el = document.getElementById('stock-' + k);
                 const low = document.getElementById('low-' + k);
                 const stock = shopData.stock[k];
@@ -804,7 +802,7 @@
         }
 
         function clearCart() {
-            ['pergaminho','leitura','metal','gold','bau'].forEach(item => {
+            ['pergaminho','leitura','metal','gold'].forEach(item => {
                 document.getElementById('qty-' + item).value = 0;
                 const subEl = document.getElementById('sub-' + item);
                 if (subEl) subEl.textContent = '';
@@ -990,7 +988,6 @@
                 else if (item === 'leitura') preçoCheio = qty * p.leitura;
                 else if (item === 'metal') preçoCheio = qty * p.metal;
                 else if (item === 'gold') preçoCheio = qty * p.gold;
-                else if (item === 'bau') preçoCheio = qty * p.bau;
                 return preçoCheio * (1 - promo.pct / 100);
             }
             // Sem promoção de desconto — usa lógica normal
@@ -1008,12 +1005,11 @@
             if (item === 'leitura') return qty * p.leitura;
             if (item === 'metal') return qty * p.metal;
             if (item === 'gold') return qty * p.gold;
-            if (item === 'bau') return qty * p.bau;
             return 0;
         }
 
         function updateCart() {
-            const items = ['pergaminho','leitura','metal','gold','bau'];
+            const items = ['pergaminho','leitura','metal','gold'];
             const names = { pergaminho:'Pergaminho de Aprimoramento', leitura:'Leitura de Arumaka', metal:'Metal Mágico+', gold:'Gold', bau:'Baú da Ceifadora' };
             let cartHTML = '', totalComDesc = 0, totalSemDesc = 0, count = 0;
             const p = shopData.prices;
@@ -1030,7 +1026,6 @@
                     else if (item === 'leitura') semDesc = qty * p.leitura;
                     else if (item === 'metal') semDesc = qty * p.metal;
                     else if (item === 'gold') semDesc = qty * p.gold;
-                    else if (item === 'bau') semDesc = qty * p.bau;
 
                     // Preço com desconto por item + promoção
                     const comDesc = calcPriceWithPromo(item, qty);
@@ -1120,7 +1115,7 @@
         }
 
         function sendOrder() {
-            const items = ['pergaminho','leitura','metal','gold','bau'];
+            const items = ['pergaminho','leitura','metal','gold'];
             const names = { pergaminho:'Pergaminho de Aprimoramento', leitura:'Leitura de Arumaka', metal:'Metal Mágico+', gold:'Gold', bau:'Baú da Ceifadora' };
             const p = shopData.prices;
             let msg = 'Olá! Gostaria de fazer um pedido no MT2 Zeta:\n\n';
@@ -1134,7 +1129,6 @@
                     else if (item === 'leitura') semDesc = qty * p.leitura;
                     else if (item === 'metal') semDesc = qty * p.metal;
                     else if (item === 'gold') semDesc = qty * p.gold;
-                    else if (item === 'bau') semDesc = qty * p.bau;
                     const comDesc = calcPrice(item, qty);
                     totalSemDesc += semDesc;
                     totalComDesc += comDesc;
@@ -1183,12 +1177,10 @@
                 document.getElementById('adm-stock-leitura').value = shopData.stock.leitura;
                 document.getElementById('adm-stock-metal').value = shopData.stock.metal;
                 document.getElementById('adm-stock-gold').value = shopData.stock.gold;
-                document.getElementById('adm-stock-bau').value = shopData.stock.bau;
                 document.getElementById('adm-price-pergaminho').value = shopData.prices.pergaminho;
                 document.getElementById('adm-price-leitura').value = shopData.prices.leitura;
                 document.getElementById('adm-price-metal').value = shopData.prices.metal;
                 document.getElementById('adm-price-gold').value = shopData.prices.gold;
-                document.getElementById('adm-price-bau').value = shopData.prices.bau;
                 document.getElementById('adm-sales').value = shopData.sales;
             } else {
                 setTimeout(() => document.getElementById('adminPass').focus(), 100);
@@ -1220,12 +1212,10 @@
                     document.getElementById('adm-stock-leitura').value = shopData.stock.leitura;
                     document.getElementById('adm-stock-metal').value = shopData.stock.metal;
                     document.getElementById('adm-stock-gold').value = shopData.stock.gold;
-                    document.getElementById('adm-stock-bau').value = shopData.stock.bau;
                     document.getElementById('adm-price-pergaminho').value = shopData.prices.pergaminho;
                     document.getElementById('adm-price-leitura').value = shopData.prices.leitura;
                     document.getElementById('adm-price-metal').value = shopData.prices.metal;
                     document.getElementById('adm-price-gold').value = shopData.prices.gold;
-                    document.getElementById('adm-price-bau').value = shopData.prices.bau;
                     document.getElementById('adm-sales').value = shopData.sales;
                 } else {
                     alert('Senha incorreta!');
@@ -1244,12 +1234,10 @@
             shopData.stock.leitura = parseInt(document.getElementById('adm-stock-leitura').value) || 0;
             shopData.stock.metal = parseInt(document.getElementById('adm-stock-metal').value) || 0;
             shopData.stock.gold = parseInt(document.getElementById('adm-stock-gold').value) || 0;
-            shopData.stock.bau = parseInt(document.getElementById('adm-stock-bau').value) || 0;
             shopData.prices.pergaminho = parseFloat(document.getElementById('adm-price-pergaminho').value) || 10;
             shopData.prices.leitura = parseFloat(document.getElementById('adm-price-leitura').value) || 1.50;
             shopData.prices.metal = parseFloat(document.getElementById('adm-price-metal').value) || 10;
             shopData.prices.gold = parseFloat(document.getElementById('adm-price-gold').value) || 0.40;
-            shopData.prices.bau = parseFloat(document.getElementById('adm-price-bau').value) || 15;
             shopData.sales = parseInt(document.getElementById('adm-sales').value) || 0;
             renderAll();
             await saveDataOnline();
