@@ -519,7 +519,6 @@
                         <span class="field-label">Gold (kk):</span>
                         <input type="number" class="field-input" id="adm-stock-gold" step="50">
                         <span class="field-label">Baú da Ceifadora:</span>
-                        <input type="number" class="field-input" id="adm-stock-bau">
                     </div>
                     <div style="border-top:1px solid var(--border);margin:16px 0;"></div>
                     <div class="admin-section" style="margin-top:0;padding-top:0;border-top:none;">
@@ -537,7 +536,6 @@
                         <span class="field-label">Gold (por 1kk):</span>
                         <input type="number" class="field-input" id="adm-price-gold" step="0.10">
                         <span class="field-label">Baú da Ceifadora:</span>
-                        <input type="number" class="field-input" id="adm-price-bau" step="1">
                         </div>
                     </div>
                     <button class="save-btn" onclick="adminSave()">💾 Salvar</button>
@@ -643,8 +641,8 @@
         let authToken = null;
 
         const DEFAULT_DATA = {
-            stock: { pergaminho: 5000, leitura: 200, metal: 50, gold: 500, bau: 10 },
-            prices: { pergaminho: 10, leitura: 1.50, metal: 10, gold: 0.40, bau: 15 },
+            stock: { pergaminho: 5000, leitura: 200, metal: 50, gold: 500 },
+            prices: { pergaminho: 10, leitura: 1.50, metal: 10, gold: 0.40 },
             sales: 0,
             promo: { active: false, pct: 0, msg: '' },
             itens: [],
@@ -730,7 +728,6 @@
             document.getElementById('stock-leitura').textContent = shopData.stock.leitura;
             document.getElementById('stock-metal').textContent = shopData.stock.metal;
             document.getElementById('stock-gold').textContent = fmtGold(shopData.stock.gold);
-            document.getElementById('stock-bau').textContent = shopData.stock.bau;
             animateSalesCount(shopData.sales);
             const admSalesDisplay = document.getElementById('adm-sales-display');
             if (admSalesDisplay) admSalesDisplay.textContent = shopData.sales;
@@ -744,7 +741,7 @@
             document.getElementById('price-leitura').textContent = fmt(p.leitura) + ' cada';
             document.getElementById('price-metal').textContent = fmt(p.metal) + ' cada';
             document.getElementById('price-gold').textContent = fmt(p.gold) + ' por 1kk';
-            const lowLimits = { pergaminho: 400, leitura: 10, metal: 10, gold: 100, bau: 5 };
+            const lowLimits = { pergaminho: 400, leitura: 10, metal: 10, gold: 100 };
             ['pergaminho','leitura','metal','gold'].forEach(k => {
                 const el = document.getElementById('stock-' + k);
                 const low = document.getElementById('low-' + k);
@@ -792,7 +789,7 @@
         }
 
         function cartChangeQty(item, dir) {
-            const steps = { pergaminho: 200, gold: 50, leitura: 1, metal: 1, bau: 1 };
+            const steps = { pergaminho: 200, gold: 50, leitura: 1, metal: 1 };
             const step = steps[item] || 1;
             const input = document.getElementById('qty-' + item);
             const current = parseInt(input.value) || 0;
@@ -1178,12 +1175,10 @@
                 document.getElementById('adm-stock-leitura').value = shopData.stock.leitura;
                 document.getElementById('adm-stock-metal').value = shopData.stock.metal;
                 document.getElementById('adm-stock-gold').value = shopData.stock.gold;
-                document.getElementById('adm-stock-bau').value = shopData.stock.bau;
                 document.getElementById('adm-price-pergaminho').value = shopData.prices.pergaminho;
                 document.getElementById('adm-price-leitura').value = shopData.prices.leitura;
                 document.getElementById('adm-price-metal').value = shopData.prices.metal;
                 document.getElementById('adm-price-gold').value = shopData.prices.gold;
-                document.getElementById('adm-price-bau').value = shopData.prices.bau;
                 document.getElementById('adm-sales').value = shopData.sales;
             } else {
                 setTimeout(() => document.getElementById('adminPass').focus(), 100);
@@ -1215,12 +1210,10 @@
                     document.getElementById('adm-stock-leitura').value = shopData.stock.leitura;
                     document.getElementById('adm-stock-metal').value = shopData.stock.metal;
                     document.getElementById('adm-stock-gold').value = shopData.stock.gold;
-                    document.getElementById('adm-stock-bau').value = shopData.stock.bau;
                     document.getElementById('adm-price-pergaminho').value = shopData.prices.pergaminho;
                     document.getElementById('adm-price-leitura').value = shopData.prices.leitura;
                     document.getElementById('adm-price-metal').value = shopData.prices.metal;
                     document.getElementById('adm-price-gold').value = shopData.prices.gold;
-                    document.getElementById('adm-price-bau').value = shopData.prices.bau;
                     document.getElementById('adm-sales').value = shopData.sales;
                 } else {
                     alert('Senha incorreta!');
@@ -1239,12 +1232,10 @@
             shopData.stock.leitura = parseInt(document.getElementById('adm-stock-leitura').value) || 0;
             shopData.stock.metal = parseInt(document.getElementById('adm-stock-metal').value) || 0;
             shopData.stock.gold = parseInt(document.getElementById('adm-stock-gold').value) || 0;
-            shopData.stock.bau = parseInt(document.getElementById('adm-stock-bau').value) || 0;
             shopData.prices.pergaminho = parseFloat(document.getElementById('adm-price-pergaminho').value) || 10;
             shopData.prices.leitura = parseFloat(document.getElementById('adm-price-leitura').value) || 1.50;
             shopData.prices.metal = parseFloat(document.getElementById('adm-price-metal').value) || 10;
             shopData.prices.gold = parseFloat(document.getElementById('adm-price-gold').value) || 0.40;
-            shopData.prices.bau = parseFloat(document.getElementById('adm-price-bau').value) || 15;
             shopData.sales = parseInt(document.getElementById('adm-sales').value) || 0;
             renderAll();
             await saveDataOnline();
