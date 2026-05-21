@@ -446,8 +446,6 @@
                     <div class="item-subtotal" id="sub-gold"></div>
                 </div>
             </div>
-            <!-- Consumíveis extras cadastrados pelo admin -->
-            <div id="extra-consumiveis-grid" class="items-grid"></div>
             </div><!-- /consumiveis-wrapper -->
         </div>
         <div class="tab-content" id="tab-comercio">
@@ -1415,7 +1413,7 @@
         }
 
         function renderConsumiveisExtras() {
-            const gridAdmin = document.getElementById('extra-consumiveis-grid');
+            const gridAdmin = document.getElementById('extra-consumiveis-grid'); // removido do HTML, null seguro
             const gridPlayer = document.getElementById('comercio-consumiveis-grid');
             const lista = document.getElementById('adm-extra-lista');
             const extras = shopData.consumiveis || [];
@@ -1424,9 +1422,11 @@
             const playerItems = extras.map((c, i) => ({c, i})).filter(({c}) =>  c.whatsapp);
 
             // Grid Consumíveis (aba principal) — apenas itens do admin
-            gridAdmin.innerHTML = adminItems.length
-                ? adminItems.map(({c, i}) => buildConsumCard(c, i)).join('')
-                : '';
+            if (gridAdmin) {
+                gridAdmin.innerHTML = adminItems.length
+                    ? adminItems.map(({c, i}) => buildConsumCard(c, i)).join('')
+                    : '';
+            }
 
             // Grid Comércio > Consumíveis — itens dos players
             if (gridPlayer) {
