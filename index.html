@@ -1395,18 +1395,26 @@
                     const imgHTML = imgSrc
                         ? `<img src="${imgSrc}" alt="${c.nome}" class="item-image" onclick="abrirImgModal('${imgSrc}')" onerror="this.style.display='none'">`
                         : `<div style="font-size:48px;margin-bottom:8px;">📦</div>`;
-                    return `<div class="item-card${esgotado ? ' esgotado' : ''}">
-                        ${imgHTML}
-                        <div class="item-name">${c.nome}</div>
-                        <div class="item-price">R$ ${parseFloat(c.preco).toFixed(2).replace('.',',')} cada</div>
-                        <div class="item-stock">Estoque: <strong id="extra-stock-${i}" class="${esgotado ? 'out' : ''}">${c.stock}</strong></div>
-                        ${esgotado ? '<div class="esgotado-badge">🚫 Esgotado</div>' : ''}
-                        <div class="qty-row">
+                    const CHAVE_UNIT = { pergaminho: 'a cada 200', leitura: 'cada', metal: 'cada', gold: 'por 1kk' };
+                    const unidade = CHAVE_UNIT[c.chave] || 'cada';
+                    const stockFmt = c.chave === 'gold' ? c.stock + 'kk' : c.stock;
+                    const whatsNum = c.whatsapp ? c.whatsapp.replace(/\D/g,'') : '';
+                    const whatsMsg = encodeURIComponent('Olá! Tenho interesse no anúncio: ' + c.nome + ' (R$ ' + parseFloat(c.preco).toFixed(2).replace('.',',') + ' ' + unidade + ')');
+                    const acaoHTML = whatsNum
+                        ? `<a href="https://wa.me/55${whatsNum}?text=${whatsMsg}" target="_blank" class="item-card-btn" style="margin-top:10px;width:100%;box-sizing:border-box;">🛒 Tenho Interesse</a>`
+                        : `<div class="qty-row">
                             <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtra(${i},-1)">-</button>
                             <input type="number" class="qty-input" id="qty-extra-${i}" value="0" min="0" onchange="validateQtyExtra(${i})">
                             <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtra(${i},1)">+</button>
                         </div>
-                        <div class="item-subtotal" id="sub-extra-${i}"></div>
+                        <div class="item-subtotal" id="sub-extra-${i}"></div>`;
+                    return `<div class="item-card${esgotado ? ' esgotado' : ''}">
+                        ${imgHTML}
+                        <div class="item-name">${c.nome}</div>
+                        <div class="item-price">R$ ${parseFloat(c.preco).toFixed(2).replace('.',',')} ${unidade}</div>
+                        <div class="item-stock">${c.chave === 'gold' ? 'Disponível' : 'Estoque'}: <strong id="extra-stock-${i}" class="${esgotado ? 'out' : ''}">${stockFmt}</strong></div>
+                        ${esgotado ? '<div class="esgotado-badge">🚫 Esgotado</div>' : ''}
+                        ${acaoHTML}
                     </div>`;
                 }).join('');
             }
