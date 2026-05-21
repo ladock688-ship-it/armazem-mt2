@@ -263,11 +263,15 @@
         .tab-sorte.active, .tab-sorte:hover { background: linear-gradient(135deg, rgba(251,191,36,0.35), rgba(245,158,11,0.25)) !important; }
         @keyframes sortePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(251,191,36,0); } 50% { box-shadow: 0 0 12px 3px rgba(251,191,36,0.25); } }
         .sub-tab-content { display: none; }
-        .sub-tabs-wrapper { border-bottom: 1px solid var(--border); margin-bottom: 20px; display: flex; }
-        .sub-tab { padding: 10px 24px; border-radius: 0; border: none; border-bottom: 3px solid transparent; background: transparent; color: var(--text-muted); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.25s; font-family: Outfit,sans-serif; }
-        .sub-tab.active { color: var(--accent-light); border-bottom: 3px solid var(--accent-light); }
-        .sub-tab:hover:not(.active) { color: var(--text); }
         .sub-tab-content.active { display: block; }
+        .subtab-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
+        .subtab-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: 16px; padding: 28px 20px; text-align: center; cursor: pointer; transition: all 0.3s; font-family: Outfit,sans-serif; color: var(--text); }
+        .subtab-card:hover { border-color: var(--accent-light); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        .subtab-card.active { border-color: var(--accent); background: linear-gradient(135deg, rgba(124,91,245,0.18), rgba(155,122,255,0.1)); box-shadow: 0 0 24px var(--accent-glow); }
+        .subtab-card-icon { font-size: 44px; margin-bottom: 10px; }
+        .subtab-card-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+        .subtab-card.active .subtab-card-title { color: var(--accent-light); }
+        .subtab-card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
         .fixed-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(13,12,20,0.96); backdrop-filter: blur(12px); border-top: 1px solid var(--border); z-index: 900; padding: 10px 16px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
         .fixed-footer-label { font-size: 12px; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
         .fixed-footer-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 20px; background: linear-gradient(135deg,#25D366,#128C7E); color: #fff; font-size: 12px; font-weight: 700; text-decoration: none; font-family: 'Outfit',sans-serif; transition: all 0.2s; white-space: nowrap; }
@@ -383,9 +387,17 @@
 
     <div class="container">
     <div id="tab-comercio">
-            <div class="sub-tabs-wrapper">
-                <button class="sub-tab active" onclick="switchSubTab('comercio-consumiveis',this)">🧪 Consumíveis</button>
-                <button class="sub-tab" onclick="switchSubTab('comercio-itens',this)">⚔️ Itens</button>
+            <div class="subtab-cards">
+                <button class="subtab-card active" onclick="switchSubTab('comercio-consumiveis',this)">
+                    <div class="subtab-card-icon">🧪</div>
+                    <div class="subtab-card-title">Consumíveis</div>
+                    <div class="subtab-card-desc">Pergaminhos, Leituras, Metal e Gold anunciados pela comunidade</div>
+                </button>
+                <button class="subtab-card" onclick="switchSubTab('comercio-itens',this)">
+                    <div class="subtab-card-icon">⚔️</div>
+                    <div class="subtab-card-title">Itens</div>
+                    <div class="subtab-card-desc">Equipamentos e itens únicos de outros jogadores</div>
+                </button>
             </div>
             <div id="sub-comercio-consumiveis" class="sub-tab-content active" style="display:block;">
                 
@@ -704,8 +716,8 @@
         }
 
         function switchSubTab(name, btn) {
-            const parent = btn.closest('.tab-content');
-            parent.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+            const parent = document.getElementById('tab-comercio');
+            parent.querySelectorAll('.subtab-card').forEach(t => t.classList.remove('active'));
             parent.querySelectorAll('.sub-tab-content').forEach(t => { t.classList.remove('active'); t.style.display = 'none'; });
             btn.classList.add('active');
             const el = document.getElementById('sub-' + name);
