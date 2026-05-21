@@ -1897,13 +1897,19 @@
                     msg.textContent = '✅ Anúncio enviado! Aguarde a aprovação.';
                     setTimeout(fecharModalAnuncioConsumivel, 2500);
                 } else {
-                    throw new Error('Erro');
+                    const texto = await res.text().catch(() => '');
+                    console.error('Anuncio erro', res.status, texto);
+                    msg.style.background = 'rgba(248,113,113,0.1)';
+                    msg.style.color = 'var(--red)';
+                    msg.style.border = '1px solid rgba(248,113,113,0.3)';
+                    msg.textContent = `❌ Erro ${res.status} ao enviar. Verifique o console (F12).`;
                 }
             } catch(e) {
+                console.error('Anuncio fetch falhou:', e);
                 msg.style.background = 'rgba(248,113,113,0.1)';
                 msg.style.color = 'var(--red)';
                 msg.style.border = '1px solid rgba(248,113,113,0.3)';
-                msg.textContent = '❌ Erro ao enviar. Tente novamente.';
+                msg.textContent = '❌ Sem conexão com o servidor. Tente novamente.';
             }
         }
     </script>
