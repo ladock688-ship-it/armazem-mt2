@@ -377,6 +377,24 @@
         </div>
     </div>
 
+    <!-- Modal editar pendente -->
+    <div class="edit-item-modal" id="editPendenteModal" onclick="if(event.target===this)fecharEditPendente()">
+        <div class="edit-item-box">
+            <button class="como-modal-close" onclick="fecharEditPendente()">✕</button>
+            <h3>✏️ Editar Anúncio Pendente</h3>
+            <input type="hidden" id="edit-pendente-id">
+            <span class="field-label">Nome do item:</span>
+            <input type="text" class="field-input" id="edit-pendente-nome">
+            <span class="field-label">Preço (R$):</span>
+            <input type="number" class="field-input" id="edit-pendente-preco" step="0.01" min="0">
+            <span class="field-label" id="edit-pendente-qtd-label">Quantidade:</span>
+            <input type="number" class="field-input" id="edit-pendente-qtd" min="0">
+            <span class="field-label">Nick no jogo:</span>
+            <input type="text" class="field-input" id="edit-pendente-nick">
+            <button class="save-btn" style="margin-top:12px;" onclick="salvarEdicaoPendente()">💾 Salvar Alterações</button>
+        </div>
+    </div>
+
     <!-- Modal Como Funciona -->
     <div class="como-modal" id="comoModal" onclick="if(event.target===this)fecharComoModal()">
         <div class="como-modal-box">
@@ -460,8 +478,7 @@
                 <div class="adm-tabs">
                     <button class="adm-tab" onclick="switchAdmTab('consumiveis',this)">🧪 Consumíveis</button>
                     <button class="adm-tab" onclick="switchAdmTab('itens',this)">⚔️ Itens</button>
-                    <button class="adm-tab" onclick="switchAdmTab('promo',this)">🎉 Promoção</button>
-                    <button class="adm-tab active" onclick="switchAdmTab('pendentes',this)">📋 Pendentes</button>
+                    <button class="adm-tab active" onclick="switchAdmTab('pendentes',this)">📋 Pendentes <span id="pendentes-badge" style="display:none;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;margin-left:5px;vertical-align:middle;line-height:1.5;"></span></button>
                 </div>
 
                 <!-- ABA CONSUMÍVEIS -->
@@ -495,36 +512,6 @@
                 </div>
 
                 <!-- ABA PROMOÇÃO -->
-                <div class="adm-panel" id="adm-promo">
-                    <div class="admin-section" style="margin-top:0;padding-top:0;border-top:none;">
-                        <div id="promo-status-adm" style="text-align:center;padding:10px;border-radius:10px;margin-bottom:14px;font-weight:700;font-size:14px;"></div>
-
-                        <!-- TIPO 1: DESCONTO % -->
-                        <h3 style="margin-bottom:6px;">🔥 Tipo 1 — Desconto em tudo</h3>
-                        <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Aplica % de desconto em todos os itens. Substitui todos os outros descontos.</p>
-                        <span class="field-label">Desconto (%):</span>
-                        <input type="number" class="field-input" id="adm-promo-pct" step="5" min="0" max="100" placeholder="Ex: 20">
-                        <span class="field-label">Mensagem (opcional):</span>
-                        <input type="text" class="field-input" id="adm-promo-msg" placeholder="Ex: Promoção de fim de semana!">
-                        <button class="save-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);margin-top:10px;" onclick="togglePromo('desconto', true)">🚀 Ativar Desconto</button>
-
-                        <div style="border-top:1px solid var(--border);margin:18px 0;"></div>
-
-                        <!-- TIPO 2: BRINDE -->
-                        <h3 style="margin-bottom:6px;">🎁 Tipo 2 — Brinde por valor mínimo</h3>
-                        <p style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Exibe um aviso de brinde quando o pedido atingir o valor definido.</p>
-                        <span class="field-label">Valor mínimo (R$):</span>
-                        <input type="number" class="field-input" id="adm-brinde-valor" step="10" min="0" placeholder="Ex: 50">
-                        <span class="field-label">Descrição do brinde:</span>
-                        <input type="text" class="field-input" id="adm-brinde-msg" placeholder="Ex: 1 Baú da Ceifadora grátis!">
-                        <button class="save-btn" style="background:linear-gradient(135deg,#34d399,#059669);margin-top:10px;" onclick="togglePromo('brinde', true)">🎁 Ativar Brinde</button>
-
-                        <div style="border-top:1px solid var(--border);margin:18px 0;"></div>
-                        <button class="save-btn" style="background:linear-gradient(135deg,#6b7280,#4b5563);" onclick="togglePromo('', false)">❌ Desativar Tudo</button>
-                    </div>
-                    <div class="sync-status" id="syncStatusPromo"></div>
-                </div>
-
                 <!-- ABA PENDENTES -->
                 <div class="adm-panel active" id="adm-pendentes">
                     <div class="admin-section" style="margin-top:0;padding-top:0;border-top:none;">
@@ -547,6 +534,7 @@
         const WORKER_URL = 'https://armazem-api.ladock688.workers.dev';
         const SITE_SECRET = 'armazem-worker-2025';
         let authToken = null;
+        let pendentesCache = {};
 
         const DEFAULT_DATA = {
             stock: { pergaminho: 5000, leitura: 200, metal: 50, gold: 500 },
@@ -595,7 +583,7 @@
         }
 
         async function saveDataOnline() {
-            const ids = ['syncStatusItens','syncStatusPromo'];
+            const ids = ['syncStatusItens'];
             ids.forEach(id => { const el = document.getElementById(id); if(el){ el.className='sync-status'; el.textContent='⏳ Salvando...'; } });
             // Proteção: nunca salvar itens ou consumiveis vazios por acidente
             if (!shopData.itens) shopData.itens = [];
@@ -742,10 +730,16 @@
                 }
                 const data = await res.json();
                 const itens = data.pendentes || [];
+                // Atualiza badge
+                const badge = document.getElementById('pendentes-badge');
+                if (badge) { badge.textContent = itens.length; badge.style.display = itens.length > 0 ? 'inline' : 'none'; }
                 if (itens.length === 0) {
                     lista.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:14px;">✅ Nenhum anúncio pendente.</p>';
                     return;
                 }
+                // Popula cache para edição
+                pendentesCache = {};
+                itens.forEach(item => { pendentesCache[item.id] = item; });
                 lista.innerHTML = '';
                 itens.forEach(item => {
                     const card = document.createElement('div');
@@ -758,10 +752,11 @@
                                 <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">${tipo} · ${data_fmt}</div>
                                 <div style="font-size:15px;font-weight:700;margin-bottom:4px;">${item.item || item.nome || '—'}</div>
                                 ${item.img ? `<div style="position:relative;display:inline-block;margin-bottom:6px;"><img src="${item.img}" onclick="abrirImgModal('${item.img}')" style="max-height:60px;border-radius:8px;display:block;cursor:zoom-in;" title="Clique para ampliar"><div style="position:absolute;bottom:2px;right:2px;background:rgba(0,0,0,0.6);color:#fff;font-size:9px;padding:1px 4px;border-radius:4px;pointer-events:none;">🔍</div></div>` : ''}
-                                <div style="font-size:13px;color:var(--text-secondary);">Qtd: ${item.quantidade || '—'} · Preço: R$ ${parseFloat(item.preco||0).toFixed(2).replace('.',',')} · WhatsApp: ${item.whatsapp || '—'}</div>
+                                <div style="font-size:13px;color:var(--text-secondary);">Qtd: ${item.quantidade || '—'} · Preço: R$ ${parseFloat(item.preco||0).toFixed(2).replace('.',',')} · WhatsApp: ${item.whatsapp || '—'}${item.nick ? ' · Nick: ' + item.nick : ''}</div>
                             </div>
                             <div style="display:flex;flex-direction:column;gap:8px;">
                                 <button class="btn-aprovar" onclick="aprovarAnuncio('${item.id}')">✅ Aprovar</button>
+                                <button onclick="editarPendente('${item.id}')" style="background:rgba(124,91,245,0.2);border:1px solid rgba(124,91,245,0.4);color:var(--accent-light);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;">✏️ Editar</button>
                                 <button class="btn-rejeitar" onclick="rejeitarAnuncio('${item.id}')">❌ Rejeitar</button>
                             </div>
                         </div>`;
@@ -791,6 +786,45 @@
                 });
                 if (res.ok) carregarPendentes();
                 else alert('Erro ao rejeitar anúncio.');
+            } catch(e) { alert('Erro de conexão.'); }
+        }
+
+        function editarPendente(id) {
+            const item = pendentesCache[id];
+            if (!item) return;
+            document.getElementById('edit-pendente-id').value = id;
+            document.getElementById('edit-pendente-nome').value = item.item || item.nome || '';
+            document.getElementById('edit-pendente-preco').value = item.preco || '';
+            document.getElementById('edit-pendente-nick').value = item.nick || '';
+            const isConsumivel = item.tipo !== 'item';
+            document.getElementById('edit-pendente-qtd-label').style.display = isConsumivel ? '' : 'none';
+            document.getElementById('edit-pendente-qtd').style.display = isConsumivel ? '' : 'none';
+            document.getElementById('edit-pendente-qtd').value = item.quantidade || 0;
+            document.getElementById('editPendenteModal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function fecharEditPendente() {
+            document.getElementById('editPendenteModal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        async function salvarEdicaoPendente() {
+            const id = document.getElementById('edit-pendente-id').value;
+            const item = pendentesCache[id];
+            const nome = document.getElementById('edit-pendente-nome').value.trim();
+            const preco = document.getElementById('edit-pendente-preco').value;
+            const nick = document.getElementById('edit-pendente-nick').value.trim();
+            const changes = { preco, nick, item: nome, nome };
+            if (item && item.tipo !== 'item') changes.quantidade = document.getElementById('edit-pendente-qtd').value;
+            try {
+                const res = await fetch(WORKER_URL + '/pendentes/' + id + '/editar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Auth-Token': authToken },
+                    body: JSON.stringify(changes)
+                });
+                if (res.ok) { fecharEditPendente(); carregarPendentes(); }
+                else alert('Erro ao salvar alterações.');
             } catch(e) { alert('Erro de conexão.'); }
         }
 
