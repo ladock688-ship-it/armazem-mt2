@@ -1399,9 +1399,14 @@
                     const unidade = CHAVE_UNIT[c.chave] || 'cada';
                     const stockFmt = c.chave === 'gold' ? c.stock + 'kk' : c.stock;
                     const whatsNum = c.whatsapp ? c.whatsapp.replace(/\D/g,'') : '';
-                    const whatsMsg = encodeURIComponent('Olá! Tenho interesse no anúncio: ' + c.nome + ' (R$ ' + parseFloat(c.preco).toFixed(2).replace('.',',') + ' ' + unidade + ')');
                     const acaoHTML = whatsNum
-                        ? `<a href="https://wa.me/55${whatsNum}?text=${whatsMsg}" target="_blank" class="item-card-btn" style="margin-top:10px;width:100%;box-sizing:border-box;">🛒 Tenho Interesse</a>`
+                        ? `<div class="qty-row">
+                            <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtraWpp(${i},-1)">-</button>
+                            <input type="number" class="qty-input" id="qty-wpp-${i}" value="0" min="0" style="pointer-events:none;">
+                            <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtraWpp(${i},1)">+</button>
+                        </div>
+                        <div class="item-subtotal" id="sub-wpp-${i}"></div>
+                        <button onclick="abrirWppExtra(${i})" ${esgotado ? 'disabled' : ''} class="item-card-btn" style="margin-top:8px;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:'Outfit',sans-serif;">🛒 Tenho Interesse</button>`
                         : `<div class="qty-row">
                             <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtra(${i},-1)">-</button>
                             <input type="number" class="qty-input" id="qty-extra-${i}" value="0" min="0" onchange="validateQtyExtra(${i})">
@@ -1439,6 +1444,37 @@
             if (c.chave === 'gold') return 50;
             if (c.chave === 'pergaminho') return 200;
             return 1;
+        }
+
+        function changeQtyExtraWpp(index, delta) {
+            const input = document.getElementById('qty-wpp-' + index);
+            const c = shopData.consumiveis[index];
+            const step = getExtraStep(c);
+            let val = Math.max(0, (parseInt(input.value) || 0) + delta * step);
+            if (val > c.stock) {
+                val = Math.floor(c.stock / step) * step;
+                input.style.borderColor = 'var(--red)';
+                setTimeout(() => input.style.borderColor = '', 1000);
+            }
+            input.value = val;
+            const sub = val * parseFloat(c.preco);
+            const subEl = document.getElementById('sub-wpp-' + index);
+            if (subEl) subEl.textContent = val > 0 ? 'R$ ' + sub.toFixed(2).replace('.', ',') : '';
+        }
+
+        function abrirWppExtra(index) {
+            const input = document.getElementById('qty-wpp-' + index);
+            const c = shopData.consumiveis[index];
+            const val = parseInt(input.value) || 0;
+            if (val === 0) { alert('Selecione a quantidade antes de continuar.'); return; }
+            const whatsNum = c.whatsapp ? c.whatsapp.replace(/\D/g,'') : '';
+            if (!whatsNum) return;
+            const CHAVE_UNIT = { pergaminho: 'a cada 200', leitura: 'cada', metal: 'cada', gold: 'por 1kk' };
+            const unidade = CHAVE_UNIT[c.chave] || 'cada';
+            const total = (val * parseFloat(c.preco)).toFixed(2).replace('.', ',');
+            const qtdStr = c.chave === 'gold' ? val + 'kk' : val + ' unidades';
+            const msg = encodeURIComponent('Olá! Tenho interesse em comprar ' + qtdStr + ' de ' + c.nome + ' pelo valor de R$ ' + total + ' anunciado no Armazém MT2.');
+            window.open('https://wa.me/55' + whatsNum + '?text=' + msg, '_blank');
         }
 
         function changeQtyExtra(index, delta) {
@@ -1753,7 +1789,8 @@
             <div id="aviso-preco-min" style="display:none;margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.25);font-size:13px;color:var(--green);"></div>
 
             <span class="field-label">Quantidade *</span>
-            <input type="text" id="anuncio-quantidade" class="field-input" placeholder="Ex: 10 unidades, 100k gold..." style="margin-top:6px;">
+            <input type="number" id="anuncio-quantidade" class="field-input" placeholder="Ex: 100" min="1" style="margin-top:6px;">
+            <div id="aviso-qtd-anuncio" style="display:none;margin-top:6px;padding:6px 10px;border-radius:7px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);font-size:12px;color:var(--gold);font-weight:600;"></div>
 
             <span class="field-label">Preço (R$) *</span>
             <input type="number" id="anuncio-preco" class="field-input" placeholder="Ex: 15.00" min="0" step="0.01" style="margin-top:6px;" oninput="validarPrecoAnuncio()">
@@ -1805,6 +1842,7 @@
             document.getElementById('modalAnuncioConsumivel').style.display = 'block';
             document.getElementById('anuncio-msg').style.display = 'none';
             document.getElementById('aviso-preco-min').style.display = 'none';
+            document.getElementById('aviso-qtd-anuncio').style.display = 'none';
             document.getElementById('erro-preco-anuncio').style.display = 'none';
             document.getElementById('anuncio-item').value = '';
             document.getElementById('anuncio-quantidade').value = '';
@@ -1820,12 +1858,25 @@
             const chave = document.getElementById('anuncio-item').value;
             const aviso = document.getElementById('aviso-preco-min');
             const erroPr = document.getElementById('erro-preco-anuncio');
-            if (!chave) { aviso.style.display = 'none'; return; }
+            const avisoQtd = document.getElementById('aviso-qtd-anuncio');
+            const qtdInput = document.getElementById('anuncio-quantidade');
+            if (!chave) { aviso.style.display = 'none'; avisoQtd.style.display = 'none'; return; }
             const min = getPrecoMin(chave);
             const label = ANUNCIO_LABELS[chave];
             aviso.style.display = 'block';
             aviso.innerHTML = `✅ Preço mínimo para <strong>${label.nome}</strong>: <strong>${fmt2(min)}</strong> ${label.unidade}`;
             erroPr.style.display = 'none';
+            const CHAVE_STEP = { gold: 50, pergaminho: 200 };
+            const step = CHAVE_STEP[chave] || 1;
+            qtdInput.step = step;
+            qtdInput.min = step;
+            qtdInput.value = '';
+            if (step > 1) {
+                avisoQtd.style.display = 'block';
+                avisoQtd.textContent = `⚠️ Quantidade deve ser múltiplo de ${step} (ex: ${step}, ${step*2}, ${step*3}...)`;
+            } else {
+                avisoQtd.style.display = 'none';
+            }
             validarPrecoAnuncio();
         }
 
@@ -1860,6 +1911,19 @@
                 msg.style.color = 'var(--red)';
                 msg.style.border = '1px solid rgba(248,113,113,0.3)';
                 msg.textContent = '⚠️ Preencha todos os campos.';
+                return;
+            }
+            const CHAVE_STEP = { gold: 50, pergaminho: 200 };
+            const step = CHAVE_STEP[chave] || 1;
+            const qtdNum = parseInt(qtd);
+            if (isNaN(qtdNum) || qtdNum <= 0 || qtdNum % step !== 0) {
+                msg.style.display = 'block';
+                msg.style.background = 'rgba(248,113,113,0.1)';
+                msg.style.color = 'var(--red)';
+                msg.style.border = '1px solid rgba(248,113,113,0.3)';
+                msg.textContent = step > 1
+                    ? `❌ Quantidade deve ser múltiplo de ${step} (ex: ${step}, ${step*2}, ${step*3}...).`
+                    : '❌ Informe uma quantidade válida.';
                 return;
             }
 
