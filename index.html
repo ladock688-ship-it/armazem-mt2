@@ -1380,59 +1380,70 @@
             return img ? img.src : null;
         }
 
+        function buildConsumCard(c, i) {
+            const esgotado = c.stock <= 0;
+            const imgSrc = c.img || getImgPorChave(c.chave);
+            const imgHTML = imgSrc
+                ? `<img src="${imgSrc}" alt="${c.nome}" class="item-image" onclick="abrirImgModal('${imgSrc}')" onerror="this.style.display='none'">`
+                : `<div style="font-size:48px;margin-bottom:8px;">📦</div>`;
+            const CHAVE_UNIT = { pergaminho: 'a cada 200', leitura: 'cada', metal: 'cada', gold: 'por 1kk' };
+            const unidade = CHAVE_UNIT[c.chave] || 'cada';
+            const stockFmt = c.chave === 'gold' ? c.stock + 'kk' : c.stock;
+            const whatsNum = c.whatsapp ? c.whatsapp.replace(/\D/g,'') : '';
+            const acaoHTML = whatsNum
+                ? `<div class="qty-row">
+                    <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtraWpp(${i},-1)">-</button>
+                    <input type="number" class="qty-input" id="qty-wpp-${i}" value="0" min="0" style="pointer-events:none;">
+                    <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtraWpp(${i},1)">+</button>
+                </div>
+                <div class="item-subtotal" id="sub-wpp-${i}"></div>
+                <button onclick="abrirWppExtra(${i})" ${esgotado ? 'disabled' : ''} class="item-card-btn" style="margin-top:8px;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:'Outfit',sans-serif;">🛒 Tenho Interesse</button>`
+                : `<div class="qty-row">
+                    <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtra(${i},-1)">-</button>
+                    <input type="number" class="qty-input" id="qty-extra-${i}" value="0" min="0" onchange="validateQtyExtra(${i})">
+                    <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtra(${i},1)">+</button>
+                </div>
+                <div class="item-subtotal" id="sub-extra-${i}"></div>`;
+            return `<div class="item-card${esgotado ? ' esgotado' : ''}">
+                ${imgHTML}
+                <div class="item-name">${c.nome}</div>
+                <div class="item-price">R$ ${parseFloat(c.preco).toFixed(2).replace('.',',')} ${unidade}</div>
+                <div class="item-stock">${c.chave === 'gold' ? 'Disponível' : 'Estoque'}: <strong id="extra-stock-${i}" class="${esgotado ? 'out' : ''}">${stockFmt}</strong></div>
+                ${esgotado ? '<div class="esgotado-badge">🚫 Esgotado</div>' : ''}
+                ${acaoHTML}
+            </div>`;
+        }
+
         function renderConsumiveisExtras() {
-            const grid = document.getElementById('extra-consumiveis-grid');
+            const gridAdmin = document.getElementById('extra-consumiveis-grid');
+            const gridPlayer = document.getElementById('comercio-consumiveis-grid');
             const lista = document.getElementById('adm-extra-lista');
             const extras = shopData.consumiveis || [];
 
-            // Grid público
-            if (extras.length === 0) {
-                grid.innerHTML = '';
-            } else {
-                grid.innerHTML = extras.map((c, i) => {
-                    const esgotado = c.stock <= 0;
-                    const imgSrc = c.img || getImgPorChave(c.chave);
-                    const imgHTML = imgSrc
-                        ? `<img src="${imgSrc}" alt="${c.nome}" class="item-image" onclick="abrirImgModal('${imgSrc}')" onerror="this.style.display='none'">`
-                        : `<div style="font-size:48px;margin-bottom:8px;">📦</div>`;
-                    const CHAVE_UNIT = { pergaminho: 'a cada 200', leitura: 'cada', metal: 'cada', gold: 'por 1kk' };
-                    const unidade = CHAVE_UNIT[c.chave] || 'cada';
-                    const stockFmt = c.chave === 'gold' ? c.stock + 'kk' : c.stock;
-                    const whatsNum = c.whatsapp ? c.whatsapp.replace(/\D/g,'') : '';
-                    const acaoHTML = whatsNum
-                        ? `<div class="qty-row">
-                            <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtraWpp(${i},-1)">-</button>
-                            <input type="number" class="qty-input" id="qty-wpp-${i}" value="0" min="0" style="pointer-events:none;">
-                            <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtraWpp(${i},1)">+</button>
-                        </div>
-                        <div class="item-subtotal" id="sub-wpp-${i}"></div>
-                        <button onclick="abrirWppExtra(${i})" ${esgotado ? 'disabled' : ''} class="item-card-btn" style="margin-top:8px;width:100%;box-sizing:border-box;border:none;cursor:pointer;font-family:'Outfit',sans-serif;">🛒 Tenho Interesse</button>`
-                        : `<div class="qty-row">
-                            <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtra(${i},-1)">-</button>
-                            <input type="number" class="qty-input" id="qty-extra-${i}" value="0" min="0" onchange="validateQtyExtra(${i})">
-                            <button class="qty-btn" ${esgotado ? 'disabled' : ''} onclick="changeQtyExtra(${i},1)">+</button>
-                        </div>
-                        <div class="item-subtotal" id="sub-extra-${i}"></div>`;
-                    return `<div class="item-card${esgotado ? ' esgotado' : ''}">
-                        ${imgHTML}
-                        <div class="item-name">${c.nome}</div>
-                        <div class="item-price">R$ ${parseFloat(c.preco).toFixed(2).replace('.',',')} ${unidade}</div>
-                        <div class="item-stock">${c.chave === 'gold' ? 'Disponível' : 'Estoque'}: <strong id="extra-stock-${i}" class="${esgotado ? 'out' : ''}">${stockFmt}</strong></div>
-                        ${esgotado ? '<div class="esgotado-badge">🚫 Esgotado</div>' : ''}
-                        ${acaoHTML}
-                    </div>`;
-                }).join('');
+            const adminItems  = extras.map((c, i) => ({c, i})).filter(({c}) => !c.whatsapp);
+            const playerItems = extras.map((c, i) => ({c, i})).filter(({c}) =>  c.whatsapp);
+
+            // Grid Consumíveis (aba principal) — apenas itens do admin
+            gridAdmin.innerHTML = adminItems.length
+                ? adminItems.map(({c, i}) => buildConsumCard(c, i)).join('')
+                : '';
+
+            // Grid Comércio > Consumíveis — itens dos players
+            if (gridPlayer) {
+                gridPlayer.innerHTML = playerItems.length
+                    ? playerItems.map(({c, i}) => buildConsumCard(c, i)).join('')
+                    : '<div class="itens-empty" style="padding:30px;text-align:center;color:var(--text-muted);">Nenhum consumível anunciado no momento.<br>Volte em breve! 🔄</div>';
             }
 
-            // Lista no admin
+            // Lista no admin (todos, para gerenciamento)
             if (!lista) return;
             if (extras.length === 0) {
-                lista.innerHTML = '<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:8px;">Nenhum consumível extra cadastrado.</div>';
+                lista.innerHTML = '<div style="color:var(--text-muted);font-size:13px;text-align:center;padding:8px;">Nenhum consumível cadastrado.</div>';
             } else {
                 lista.innerHTML = extras.map((c, i) =>
                     `<div class="adm-item-linha">
                         ${c.img ? `<img class="adm-item-thumb" src="${c.img}" onerror="this.src=''"/>` : `<div class="adm-item-thumb" style="display:flex;align-items:center;justify-content:center;font-size:20px;">📦</div>`}
-                        <div class="adm-item-info"><strong>${c.nome}</strong><span>R$ ${parseFloat(c.preco).toFixed(2).replace('.',',')} cada • Estoque: ${c.stock}</span></div>
+                        <div class="adm-item-info"><strong>${c.nome}</strong><span>R$ ${parseFloat(c.preco).toFixed(2).replace('.',',')} cada • Estoque: ${c.stock}${c.whatsapp ? ' · 👤 Player' : ''}</span></div>
                         <div class="adm-btn-wrap"><span class="adm-tooltip">Editar</span><button class="adm-item-edit" onclick="editarConsumivel(${i})">✏️</button></div>
                         <div class="adm-btn-wrap"><span class="adm-tooltip">Remover</span><button class="adm-item-del" onclick="removerConsumivel(${i})">🗑</button></div>
                     </div>`
