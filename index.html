@@ -1394,6 +1394,16 @@
         });
 
         // ===== CONSUMÍVEIS EXTRAS =====
+        function getImgPorChave(chave) {
+            if (!chave) return null;
+            const stockEl = document.getElementById('stock-' + chave);
+            if (!stockEl) return null;
+            const card = stockEl.closest('.item-card');
+            if (!card) return null;
+            const img = card.querySelector('img');
+            return img ? img.src : null;
+        }
+
         function renderConsumiveisExtras() {
             const grid = document.getElementById('extra-consumiveis-grid');
             const lista = document.getElementById('adm-extra-lista');
@@ -1405,8 +1415,9 @@
             } else {
                 grid.innerHTML = extras.map((c, i) => {
                     const esgotado = c.stock <= 0;
-                    const imgHTML = c.img
-                        ? `<img src="${c.img}" alt="${c.nome}" class="item-image" onclick="abrirImgModal('${c.img}')" onerror="this.style.display='none'">`
+                    const imgSrc = c.img || getImgPorChave(c.chave);
+                    const imgHTML = imgSrc
+                        ? `<img src="${imgSrc}" alt="${c.nome}" class="item-image" onclick="abrirImgModal('${imgSrc}')" onerror="this.style.display='none'">`
                         : `<div style="font-size:48px;margin-bottom:8px;">📦</div>`;
                     return `<div class="item-card${esgotado ? ' esgotado' : ''}">
                         ${imgHTML}
