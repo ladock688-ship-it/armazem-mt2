@@ -356,6 +356,21 @@
         </div>
     </div>
 
+    <div class="edit-item-modal" id="editConsumModal" onclick="if(event.target===this)fecharEditConsumModal()">
+        <div class="edit-item-box">
+            <button class="como-modal-close" onclick="fecharEditConsumModal()">✕</button>
+            <h3>✏️ Editar Consumível</h3>
+            <input type="hidden" id="edit-consum-index">
+            <span class="field-label" id="edit-consum-label-nome">Item:</span>
+            <input type="text" class="field-input" id="edit-consum-nome" disabled style="opacity:0.5;cursor:not-allowed;">
+            <span class="field-label" id="edit-consum-label-stock">Quantidade em estoque:</span>
+            <input type="number" class="field-input" id="edit-consum-stock" min="0" onkeydown="if(event.key==='Enter')salvarEdicaoConsumivel()">
+            <span class="field-label">Preço (R$):</span>
+            <input type="number" class="field-input" id="edit-consum-preco" step="0.01" min="0" onkeydown="if(event.key==='Enter')salvarEdicaoConsumivel()">
+            <button class="save-btn" style="margin-top:12px;" onclick="salvarEdicaoConsumivel()">💾 Salvar</button>
+        </div>
+    </div>
+
     <!-- Modal Como Funciona -->
     <div class="como-modal" id="comoModal" onclick="if(event.target===this)fecharComoModal()">
         <div class="como-modal-box">
@@ -1406,12 +1421,34 @@
 
         function editarConsumivel(index) {
             const c = shopData.consumiveis[index];
-            document.getElementById('adm-extra-nome').value = c.nome;
-            document.getElementById('adm-extra-img').value = c.img || '';
-            document.getElementById('adm-extra-preco').value = c.preco;
-            document.getElementById('adm-extra-stock').value = c.stock;
-            shopData.consumiveis.splice(index, 1);
+            document.getElementById('edit-consum-index').value = index;
+            document.getElementById('edit-consum-nome').value = c.nome;
+            document.getElementById('edit-consum-stock').value = c.stock;
+            document.getElementById('edit-consum-preco').value = c.preco;
+            // Ajusta label de estoque conforme tipo
+            const labelStock = document.getElementById('edit-consum-label-stock');
+            if (c.chave === 'gold') labelStock.textContent = 'Disponível (kk):';
+            else if (c.chave === 'pergaminho') labelStock.textContent = 'Quantidade (múltiplos de 200):';
+            else labelStock.textContent = 'Quantidade em estoque:';
+            document.getElementById('editConsumModal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => document.getElementById('edit-consum-stock').focus(), 100);
+        }
+        function fecharEditConsumModal() {
+            document.getElementById('editConsumModal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        async function salvarEdicaoConsumivel() {
+            const index = parseInt(document.getElementById('edit-consum-index').value);
+            const stock = parseInt(document.getElementById('edit-consum-stock').value);
+            const preco = parseFloat(document.getElementById('edit-consum-preco').value) || 0;
+            if (isNaN(stock) || stock < 0) { alert('Informe uma quantidade válida!'); return; }
+            if (preco <= 0) { alert('Informe um preço válido!'); return; }
+            shopData.consumiveis[index].stock = stock;
+            shopData.consumiveis[index].preco = preco;
+            fecharEditConsumModal();
             renderConsumiveisExtras();
+            await saveDataOnline();
         }
 
         // ===== ITENS =====
