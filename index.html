@@ -266,14 +266,14 @@
         @keyframes sortePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(251,191,36,0); } 50% { box-shadow: 0 0 12px 3px rgba(251,191,36,0.25); } }
         .sub-tab-content { display: none; }
         .sub-tab-content.active { display: block; }
-        .subtab-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 28px; }
-        .subtab-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: 16px; padding: 28px 20px; text-align: center; cursor: pointer; transition: all 0.3s; font-family: Outfit,sans-serif; color: var(--text); }
-        .subtab-card:hover { border-color: var(--accent-light); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
-        .subtab-card.active { border-color: var(--accent); background: linear-gradient(135deg, rgba(124,91,245,0.18), rgba(155,122,255,0.1)); box-shadow: 0 0 24px var(--accent-glow); }
-        .subtab-card-icon { font-size: 44px; margin-bottom: 10px; }
-        .subtab-card-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+        .subtab-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+        .subtab-card { background: var(--bg-card); border: 2px solid var(--border); border-radius: 14px; padding: 16px 14px; text-align: center; cursor: pointer; transition: all 0.3s; font-family: Outfit,sans-serif; color: var(--text); }
+        .subtab-card:hover { border-color: var(--accent-light); transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
+        .subtab-card.active { border-color: var(--accent); background: linear-gradient(135deg, rgba(124,91,245,0.18), rgba(155,122,255,0.1)); box-shadow: 0 0 20px var(--accent-glow); }
+        .subtab-card-icon { font-size: 28px; margin-bottom: 6px; }
+        .subtab-card-title { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
         .subtab-card.active .subtab-card-title { color: var(--accent-light); }
-        .subtab-card-desc { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+        .subtab-card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
         .fixed-footer { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(13,12,20,0.96); backdrop-filter: blur(12px); border-top: 1px solid var(--border); z-index: 900; padding: 10px 16px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
         .fixed-footer-label { font-size: 12px; color: var(--text-muted); font-weight: 600; white-space: nowrap; }
         .fixed-footer-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 20px; background: linear-gradient(135deg,#25D366,#128C7E); color: #fff; font-size: 12px; font-weight: 700; text-decoration: none; font-family: 'Outfit',sans-serif; transition: all 0.2s; white-space: nowrap; }
@@ -391,9 +391,9 @@
     <div id="tab-comercio">
             <div class="subtab-cards">
                 <button class="subtab-card active" onclick="switchSubTab('comercio-consumiveis',this)">
-                    <div class="subtab-card-icon">🧪</div>
+                    <div class="subtab-card-icon">💰</div>
                     <div class="subtab-card-title">Consumíveis</div>
-                    <div class="subtab-card-desc">Pergaminhos, Leituras, Metal e Gold anunciados pela comunidade</div>
+                    <div class="subtab-card-desc">Pergaminhos, Leituras, Metal, Gold e muito mais — novos itens sendo adicionados em breve!</div>
                 </button>
                 <button class="subtab-card" onclick="switchSubTab('comercio-itens',this)">
                     <div class="subtab-card-icon">⚔️</div>
