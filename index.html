@@ -248,6 +248,12 @@
         .adm-item-edit:hover { background: rgba(124,91,245,0.3); }
         .adm-item-fav { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); color: #fbbf24; border-radius: 6px; padding: 4px 8px; font-size: 15px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; line-height: 1; }
         .adm-item-fav:hover { background: rgba(251,191,36,0.25); transform: scale(1.15); }
+        .btn-aprovar { padding:8px 16px;background:linear-gradient(135deg,#34d399,#059669);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 0.12s;user-select:none; }
+        .btn-aprovar:hover { filter:brightness(1.1); }
+        .btn-aprovar:active { transform:scale(0.93); filter:brightness(0.9); box-shadow:inset 0 2px 6px rgba(0,0,0,0.25); }
+        .btn-rejeitar { padding:8px 16px;background:linear-gradient(135deg,#f87171,#dc2626);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 0.12s;user-select:none; }
+        .btn-rejeitar:hover { filter:brightness(1.1); }
+        .btn-rejeitar:active { transform:scale(0.93); filter:brightness(0.9); box-shadow:inset 0 2px 6px rgba(0,0,0,0.25); }
         .adm-btn-wrap { position: relative; display: inline-block; }
         .adm-btn-wrap .adm-tooltip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: rgba(20,18,30,0.97); border: 1px solid var(--border); color: var(--text); font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 6px; white-space: nowrap; pointer-events: none; z-index: 300; font-family: 'Outfit',sans-serif; }
         .adm-btn-wrap:hover .adm-tooltip { display: block; }
@@ -322,7 +328,7 @@
     <button class="admin-btn" onclick="openAdmin()">•••</button>
     <div class="header">
         <div class="logo">ARMAZÉM</div>
-        <div class="tagline">Seu fornecedor de itens no MT2 Zeta</div>
+        <div class="tagline">O mercado de itens da comunidade MT2 Zeta</div>
         <div class="sales-counter"><div class="pulse"></div><span id="salesCount">0</span> vendas realizadas</div>
     </div>
     <!-- Banner de Promoção -->
@@ -755,8 +761,8 @@
                                 <div style="font-size:13px;color:var(--text-secondary);">Qtd: ${item.quantidade || '—'} · Preço: R$ ${parseFloat(item.preco||0).toFixed(2).replace('.',',')} · WhatsApp: ${item.whatsapp || '—'}</div>
                             </div>
                             <div style="display:flex;flex-direction:column;gap:8px;">
-                                <button onclick="aprovarAnuncio('${item.id}')" style="padding:8px 16px;background:linear-gradient(135deg,#34d399,#059669);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">✅ Aprovar</button>
-                                <button onclick="rejeitarAnuncio('${item.id}')" style="padding:8px 16px;background:linear-gradient(135deg,#f87171,#dc2626);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;">❌ Rejeitar</button>
+                                <button class="btn-aprovar" onclick="aprovarAnuncio('${item.id}')">✅ Aprovar</button>
+                                <button class="btn-rejeitar" onclick="rejeitarAnuncio('${item.id}')">❌ Rejeitar</button>
                             </div>
                         </div>`;
                     lista.appendChild(card);
